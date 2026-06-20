@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>QA AI Chatbot</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+    }
+    #chat-box {
+      border: 1px solid #ccc;
+      height: 400px;
+      overflow-y: auto;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+    .user-msg {
+      background: #e3f2fd;
+      padding: 8px;
+      margin: 5px 0;
+      border-radius: 8px;
+    }
+    .ai-msg {
+      background: #f1f1f1;
+      padding: 8px;
+      margin: 5px 0;
+      border-radius: 8px;
+    }
+    #message-input {
+      width: 75%;
+      padding: 10px;
+    }
+    #send-button {
+      width: 20%;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>QA AI Chatbot</h1>
+  <p>Ask me anything about QA testing!</p>
+
+  <div id="chat-box"></div>
+
+  <input type="text" id="message-input" placeholder="Type your message...">
+  <button id="send-button">Send</button>
+
+  <script>
+    const chatBox = document.getElementById('chat-box');
+    const input = document.getElementById('message-input');
+    const button = document.getElementById('send-button');
+
+    async function sendMessage() {
+      const message = input.value;
+      if (!message) return;
+
+      // Show user message
+      chatBox.innerHTML += `<div class="user-msg"><b>You:</b> ${message}</div>`;
+      input.value = '';
+
+      // Call our API
+      const response = await fetch('http://localhost:3000/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message })
+      });
+
+      const data = await response.json();
+
+      // Show AI response
+      chatBox.innerHTML += `<div class="ai-msg"><b>AI:</b> ${data.reply}</div>`;
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    button.addEventListener('click', sendMessage);
+    input.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendMessage();
+    });
+  </script>
+
+</body>
+</html>

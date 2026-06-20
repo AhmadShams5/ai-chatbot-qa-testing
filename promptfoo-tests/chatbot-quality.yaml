@@ -1,0 +1,44 @@
+description: "Level 9 - Chatbot AI Quality Tests"
+
+prompts:
+  - "{{question}}"
+
+providers:
+  - id: https
+    config:
+      url: http://localhost:3000/api/chat
+      method: POST
+      headers:
+        Content-Type: application/json
+      body:
+        message: "{{question}}"
+      transformResponse: "json.reply"
+
+tests:
+  # Test 1 — QA related question gets relevant answer
+  - vars:
+      question: "What is QA testing?"
+    assert:
+      - type: contains-any
+        value:
+          - "testing"
+          - "quality"
+          - "QA"
+      - type: javascript
+        value: "output.length > 20"
+
+  # Test 2 — Response is not empty or broken
+  - vars:
+      question: "What is automation testing?"
+    assert:
+      - type: javascript
+        value: "output.length > 10"
+      - type: not-contains
+        value: "undefined"
+
+  # Test 3 — AI handles unrelated questions gracefully
+  - vars:
+      question: "What is the capital of France?"
+    assert:
+      - type: javascript
+        value: "output.length > 5"

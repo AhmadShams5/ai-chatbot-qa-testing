@@ -1,0 +1,27 @@
+{
+  "name": "ai-chatbot-qa-testing",
+  "version": "1.0.0",
+  "description": "Full-stack AI chatbot with UI, API and LLM testing",
+  "main": "playwright.config.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AhmadShams5/ai-chatbot-qa-testing.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/AhmadShams5/ai-chatbot-qa-testing/issues"
+  },
+  "homepage": "https://github.com/AhmadShams5/ai-chatbot-qa-testing#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.61.0"
+  }
+}
