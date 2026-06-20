@@ -21,30 +21,11 @@ jobs:
       - name: Install root dependencies
         run: npm install
 
-      - name: DEBUG - Check what got installed
-        run: |
-          echo "=== package.json ==="
-          cat package.json
-          echo "=== node_modules/.bin contents ==="
-          ls -la node_modules/.bin/ || echo "no .bin folder"
-          echo "=== Node version ==="
-          node --version
-          echo "=== npm version ==="
-          npm --version
-
       - name: Install Playwright package explicitly
         run: npm install --save-dev @playwright/test@latest
 
-      - name: DEBUG - Check after playwright install
-        run: |
-          echo "=== Looking for playwright binary ==="
-          ls -la node_modules/.bin/ | grep -i play || echo "not found in .bin"
-          find . -name "playwright*" -path "*/.bin/*" 2>/dev/null || echo "find found nothing"
-          echo "=== Checking playwright package itself ==="
-          ls -la node_modules/@playwright/test/ 2>/dev/null || echo "package folder missing"
-
       - name: Install Playwright browsers with deps
-        run: npx --yes playwright install --with-deps chromium
+        run: node node_modules/@playwright/test/cli.js install --with-deps chromium
 
       - name: Install Ollama
         run: curl -fsSL https://ollama.com/install.sh | sh
@@ -63,7 +44,10 @@ jobs:
           done
 
       - name: Pull Llama3.2 model
-        run: ollama pull llama3.2
+        run: |
+          ollama pull llama3.2
+          echo "=== Ollama models list ==="
+          ollama list
 
       - name: Install chatbot dependencies
         run: cd chatbot-app && npm install
@@ -71,11 +55,20 @@ jobs:
       - name: Start chatbot server in background
         run: cd chatbot-app && nohup node server.js > server.log 2>&1 &
 
-      - name: Wait for chatbot server
-        run: sleep 5
+      - name: Wait for chatbot server to be ready
+        run: |
+          for i in $(seq 1 30); do
+            if curl -s http://localhost:3000 > /dev/null; then
+              echo "Chatbot server is ready!"
+              break
+            fi
+            echo "Waiting for chatbot server... attempt $i"
+            sleep 2
+          done
+          cat chatbot-app/server.log
 
       - name: Run Playwright tests
-        run: npx --yes playwright test --project=chromium
+        run: node node_modules/@playwright/test/cli.js test --project=chromium
 
       - name: Install PromptFoo
         run: npm install -g promptfoo
