@@ -65,14 +65,19 @@ jobs:
       - name: Wait for chatbot server to be ready
         run: |
           for i in $(seq 1 30); do
-            if curl -s http://localhost:3000 > /dev/null; then
+            if curl -sf http://localhost:3000 > /dev/null 2>&1; then
               echo "Chatbot server is ready!"
-              break
+              cat chatbot-app/server.log
+              exit 0
             fi
             echo "Waiting for chatbot server... attempt $i"
             sleep 2
           done
+          echo "=== SERVER NEVER STARTED - LOG OUTPUT ==="
           cat chatbot-app/server.log
+          echo "=== Checking if node process is running ==="
+          ps aux | grep node
+          exit 1
 
       - name: Run Playwright tests
         run: node node_modules/@playwright/test/cli.js test --project=chromium
