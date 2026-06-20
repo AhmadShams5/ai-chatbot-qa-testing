@@ -21,8 +21,27 @@ jobs:
       - name: Install root dependencies
         run: npm install
 
+      - name: DEBUG - Check what got installed
+        run: |
+          echo "=== package.json ==="
+          cat package.json
+          echo "=== node_modules/.bin contents ==="
+          ls -la node_modules/.bin/ || echo "no .bin folder"
+          echo "=== Node version ==="
+          node --version
+          echo "=== npm version ==="
+          npm --version
+
       - name: Install Playwright package explicitly
         run: npm install --save-dev @playwright/test@latest
+
+      - name: DEBUG - Check after playwright install
+        run: |
+          echo "=== Looking for playwright binary ==="
+          ls -la node_modules/.bin/ | grep -i play || echo "not found in .bin"
+          find . -name "playwright*" -path "*/.bin/*" 2>/dev/null || echo "find found nothing"
+          echo "=== Checking playwright package itself ==="
+          ls -la node_modules/@playwright/test/ 2>/dev/null || echo "package folder missing"
 
       - name: Install Playwright browsers with deps
         run: npx --yes playwright install --with-deps chromium
