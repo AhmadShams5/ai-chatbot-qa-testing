@@ -50,7 +50,14 @@ jobs:
           ollama list
 
       - name: Install chatbot dependencies
-        run: cd chatbot-app && npm install
+        run: |
+          cd chatbot-app
+          echo "=== package.json contents ==="
+          cat package.json
+          rm -rf node_modules package-lock.json
+          npm install
+          echo "=== Verify express installed ==="
+          ls node_modules | grep express || echo "EXPRESS NOT FOUND!"
 
       - name: Start chatbot server in background
         run: cd chatbot-app && nohup node server.js > server.log 2>&1 &
