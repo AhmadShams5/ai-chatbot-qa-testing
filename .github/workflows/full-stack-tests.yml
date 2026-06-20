@@ -21,16 +21,13 @@ jobs:
       - name: Install root dependencies
         run: npm install
 
-      - name: Install Playwright package explicitly
-        run: npm install --save-dev @playwright/test@latest
-
-      - name: Install Playwright browsers with deps
+      - name: Install Playwright browsers
         run: node node_modules/@playwright/test/cli.js install --with-deps chromium
 
       - name: Install Ollama
         run: curl -fsSL https://ollama.com/install.sh | sh
 
-      - name: Start Ollama server in background
+      - name: Start Ollama server
         run: nohup ollama serve > ollama.log 2>&1 &
 
       - name: Wait for Ollama to be ready
@@ -44,22 +41,12 @@ jobs:
           done
 
       - name: Pull Llama3.2 model
-        run: |
-          ollama pull llama3.2
-          echo "=== Ollama models list ==="
-          ollama list
+        run: ollama pull llama3.2
 
       - name: Install chatbot dependencies
-        run: |
-          cd chatbot-app
-          echo "=== package.json contents ==="
-          cat package.json
-          rm -rf node_modules package-lock.json
-          npm install
-          echo "=== Verify express installed ==="
-          ls node_modules | grep express || echo "EXPRESS NOT FOUND!"
+        run: cd chatbot-app && npm install
 
-      - name: Start chatbot server in background
+      - name: Start chatbot server
         run: cd chatbot-app && nohup node server.js > server.log 2>&1 &
 
       - name: Wait for chatbot server to be ready
@@ -67,16 +54,11 @@ jobs:
           for i in $(seq 1 30); do
             if curl -sf http://localhost:3000 > /dev/null 2>&1; then
               echo "Chatbot server is ready!"
-              cat chatbot-app/server.log
               exit 0
             fi
-            echo "Waiting for chatbot server... attempt $i"
             sleep 2
           done
-          echo "=== SERVER NEVER STARTED - LOG OUTPUT ==="
           cat chatbot-app/server.log
-          echo "=== Checking if node process is running ==="
-          ps aux | grep node
           exit 1
 
       - name: Run Playwright tests
